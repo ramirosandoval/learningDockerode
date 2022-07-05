@@ -9,30 +9,33 @@
 
 <script>
 import { Terminal } from 'xterm';
-import { AttachAddon } from 'xterm-addon-attach';
+
+// import { AttachAddon } from 'xterm-addon-attach';
+//   const attachAddon = new AttachAddon(ws);
+//   term.loadAddon(attachAddon);
 
   const ws = new WebSocket('ws://localhost:3000');
   const term = new Terminal();
-  const attachAddon = new AttachAddon(ws);
 
-  term.loadAddon(attachAddon);
 
-  ws.onmessage = ({ data }) => {
-    if(data.stream){
-      data.stream.getReader();
-    }
 
-    term.onData((data) => {
-      console.log(data)
-      ws.send(data)
-    });
+  ws.onmessage = ({data}) => {
+    console.log('21', data);
+    term.write(data.toString());
   };
+
+  term.onData((data) => {
+    console.log('26', data);
+    ws.send(data);
+  });
+
+  // term.onKey('ñ', ws.close())
 
   export default {
     name: "DockerInfo",
     mounted(){
       term.open(this.$refs.mainDiv)
-      Object.freeze(term);  
+      // Object.freeze(term);  
     }
   };
   
