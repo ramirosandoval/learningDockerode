@@ -10,48 +10,55 @@ wss.on('connection', (ws) => {
     const dockerInstance = new Docker();
     const myContainer = dockerInstance.getContainer('e0136fcadd52');
 
-    // myContainer.attach({stream: true, stdout: true, stderr: true}, function(err, stream) {
-        
-    //     stream.setEncoding('utf8');
-    //     stream.pipe(process.stdout).pipe(duplex);
-        
-    //   });
-
-
-
-    /// 
-
-    let params = {
-        Cmd: ['sh'], //,'-c','ls /'
-        AttachStdin: true,
-        AttachStdout: true,
-        AttachStderr: true,
-    }
-      
-    myContainer.exec(params,(err, exec) => {
-        if(err) throw err
-
-        exec.start({ hijack: true, stdin: true, stdout: true, stderr: true },function(err, stream) {
-
-            if(err){
-                ws.close();
-                throw err;
+    function attachTo(container){    
+        container.attach({stream: true, stdin:true, stdout: true, stderr: true}, function(err, stream) {
+            ws.onmessage = ({data}) =>{
+                ws.send(data)
             }
+
             stream.setEncoding('utf8');
 
-            duplex.pipe(process.stdout);
-            
-            stream.pipe(duplex);
+            stream.on('data', (chunk) => {
+                ws.send(chunk.toString())
+            });
         });
-    });
+    }
 
+    function listDirectoriesOn(container){
+        let params = {
+            tty: true,
+            Cmd: ['ls'],
+            AttachStdin: true,
+            AttachStdout: true,
+            AttachStderr: true,
+        }
+          
+        container.exec(params,(err, exec) => {
+            if(err) throw err
+    
+            exec.start({stdin: true, stdout: true, stderr: true },
+                function(err, stream){
 
-    ws.onmessage = ({data}) => {
-        ws.send(data.toString());
-    };
+                    ws.onmessage = ({data}) =>{
+                        ws.send(data)
+                    }
+    
+                    stream.pipe(duplex)
+                    stream.setEncoding('utf-8')
+                    stream.on('data', (chunk) => {
+                        ws.send(chunk.toString());
+                    })
+                }
+            );
+        });
+    }
 
     ws.on('close', function () {
         console.log('stream closed');
         duplex.destroy();
     });
+
+
+    listDirectoriesOn(myContainer);
+    // attachTo(myContainer);
 });
