@@ -17,16 +17,16 @@ import { AttachAddon } from 'xterm-addon-attach';
 
   term.loadAddon(attachAddon);
 
-  ws.onmessage = ({ data }) => {
-    if(data.stream){
-      data.stream.getReader();
-    }
+  // ws.onmessage = ({ data }) => {
+  //   if(data.stream){
+  //     data.stream.getReader();
+  //   }
 
-    term.onData((data) => {
-      console.log(data)
-      ws.send(data)
-    });
-  };
+    // term.onData((data) => {
+    //   console.log(data)
+    //   ws.send(data)
+    // });
+  // };
 
   export default {
     name: "DockerInfo",
