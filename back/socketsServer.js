@@ -27,7 +27,8 @@ wss.on('connection', (ws) => {
     function listDirectoriesOn(container){
         let params = {
             tty: true,
-            Cmd: ['ls'],
+            // interactive: true,
+            Cmd: ['sh'],
             AttachStdin: true,
             AttachStdout: true,
             AttachStderr: true,
@@ -40,11 +41,9 @@ wss.on('connection', (ws) => {
                 function(err, stream){
 
                     ws.onmessage = ({data}) =>{
-                        ws.send(data)
+                        console.log(data);
+                        ws.send(data);
                     }
-    
-                    stream.pipe(duplex)
-                    stream.setEncoding('utf-8')
                     stream.on('data', (chunk) => {
                         ws.send(chunk.toString());
                     })
