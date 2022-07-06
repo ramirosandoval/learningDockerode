@@ -1,4 +1,3 @@
-const pty =  require('node-pty');
 const Docker =  require('dockerode');
 const { createWebSocketStream, WebSocketServer } = require('ws');
 
@@ -11,42 +10,45 @@ wss.on('connection', (ws) => {
     const dockerInstance = new Docker();
     const myContainer = dockerInstance.getContainer('e0136fcadd52');
 
-    // const stream = myContainer.attach({stream: true, stdout: true, stderr: true}, function (err, stream) {myContainer.modem.demuxStream(stream, process.stdout, process.stderr);});
-    // const onData = myContainer.onData((data) => duplex.write(data));
+    // myContainer.attach({stream: true, stdout: true, stderr: true}, function(err, stream) {
+        
+    //     stream.setEncoding('utf8');
+    //     stream.pipe(process.stdout).pipe(duplex);
+        
+    //   });
 
-    // duplex.pipe(process.stdout); 
+
+
+    /// 
 
     let params = {
-        Cmd: ['sh','-c','ls /'],
+        Cmd: ['sh'], //,'-c','ls /'
         AttachStdin: true,
         AttachStdout: true,
         AttachStderr: true,
     }
       
-      myContainer.exec(params,(err, exec) => {
-          err && console.error(err);
+    myContainer.exec(params,(err, exec) => {
+        if(err) throw err
 
-          exec.start({ hijack: true, stdin: true, stdout: true, stderr: true }, 
-            function(err, stream) {
+        exec.start({ hijack: true, stdin: true, stdout: true, stderr: true },function(err, stream) {
 
-                if(err) return console.log(err)
+            if(err){
+                ws.close();
+                throw err;
+            }
+            stream.setEncoding('utf8');
 
-                stream.setEncoding('utf8');
-                myContainer.attach({stream: true, stdin: true, stdout: true, stderr: true}, function (err, stream) {
-                    if(err) return console.log(err)
-
-                    myContainer.modem.demuxStream(stream, process.stdin, process.stdout, process.stderr);
-                    stream.setEncoding('utf8');
-                    stream.pipe(duplex).pipe(process.stdout);
-
-                });
-                // ws.send(process.stdout.write());
-                // stream.pipe(process.stdin);
-            });
-        },
-      );
+            duplex.pipe(process.stdout);
+            
+            stream.pipe(duplex);
+        });
+    });
 
 
+    ws.onmessage = ({data}) => {
+        ws.send(data.toString());
+    };
 
     ws.on('close', function () {
         console.log('stream closed');

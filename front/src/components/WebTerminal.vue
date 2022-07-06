@@ -10,26 +10,26 @@
 <script>
 import { Terminal } from 'xterm';
 
-// import { AttachAddon } from 'xterm-addon-attach';
-//   const attachAddon = new AttachAddon(ws);
-//   term.loadAddon(attachAddon);
+import { AttachAddon } from 'xterm-addon-attach';
 
   const ws = new WebSocket('ws://localhost:3000');
   const term = new Terminal();
 
+  const attachAddon = new AttachAddon(ws);
+  term.loadAddon(attachAddon);
 
 
-  ws.onmessage = ({data}) => {
-    console.log('21', data);
-    term.write(data.toString());
-  };
+  // same as attachAddon?
 
-  term.onData((data) => {
-    console.log('26', data);
-    ws.send(data);
-  });
+  // ws.onmessage = ({data}) => {
+  //   console.log('21', data);
+  //   term.write(data.toString());
+  // };
 
-  // term.onKey('ñ', ws.close())
+  // term.onData((data) => {
+  //   console.log('26', data);
+  //   ws.send(data);
+  // });
 
   export default {
     name: "DockerInfo",
