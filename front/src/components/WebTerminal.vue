@@ -27,15 +27,12 @@ import { FitAddon } from 'xterm-addon-fit';
 
 
 
-  ws.onmessage = ({data}) => {
-    console.log('data from line 21 (onMessage)', data);
+  ws.onmessage = (socket) => {
+    console.log('data from line 21 (onMessage)', socket);
   };
 
-      // term.write(data.toString()); lo que se muestra deberia salir unicamente de lo que haya en
-    // la terminal del container
-
   term.onData((data) => {
-    console.log('data from line 26 (onData)', data);
+    console.log('data from line 26 (onData)', data.toString());
   });
 
   export default {
